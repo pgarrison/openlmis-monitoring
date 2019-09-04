@@ -25,6 +25,7 @@ services:
       - /sys:/rootfs/sys:ro
       - /proc:/rootfs/proc:ro
       - /etc:/rootfs/etc:ro
+      - openlmis-ref-distro_nginx-log:/nginx-log
     networks:
       - default
       - openlmis-ref-distro_default
@@ -42,6 +43,8 @@ services:
 volumes:
   config-volume:
     external: false
+  openlmis-ref-distro_nginx-log:
+    external: true
 
 networks:
   openlmis-ref-distro_default:
