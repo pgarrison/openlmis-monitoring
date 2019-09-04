@@ -1,0 +1,49 @@
+version: "3.3"
+services:
+
+  config-container:
+    build:
+      context: ./config
+    volumes:
+      - config-volume:/config
+
+  influxdb:
+    image: influxdb:${OL_INFLUXDB_VERSION}
+    ports:
+      - 8083:8083
+      - 8086:8086
+
+  telegraf:
+    image: telegraf:${OL_TELEGRAF_VERSION}
+    environment:
+      HOST_PROC: /rootfs/proc
+      HOST_SYS: /rootfs/sys
+      HOST_ETC: /rootfs/etc
+    volumes:
+      - config-volume:/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
+    command: ["telegraf", "--config-directory=/config/telegraf"]
+    networks:
+      - default
+      - openlmis-ref-distro_default
+    depends_on: [influxdb]
+
+  grafana:
+    image: grafana/grafana:${OL_GRAFANA_VERSION}
+    ports:
+      - 3000:3000
+    volumes:
+      - config-volume:/config
+    environment:
+      - GF_PATHS_PROVISIONING=/config/grafana/provisioning
+
+volumes:
+  config-volume:
+    external: false
+
+networks:
+  openlmis-ref-distro_default:
+    external: true
